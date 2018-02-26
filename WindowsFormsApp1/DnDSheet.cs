@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Collections;
 
-namespace WindowsFormsApp1
+namespace DnDSheet
 {
     public partial class DnDSheet : Form
     {
@@ -40,36 +40,39 @@ namespace WindowsFormsApp1
                         //reader.Close();
 
                         StringBuilder build = new StringBuilder();
-                        var reader1 = new PdfReader(@"C:\Users\Tau\Desktop\Pathfinder_Charactersheet_Joe.pdf");
-                        AcroFields fields = reader1.AcroFields;
-                        foreach (var item in reader1.AcroFields.Fields)
+                        //var reader1 = new PdfReader(@"C:\Users\Tau\Desktop\Pathfinder_Charactersheet_Joe.pdf");
+                        AcroFields fields = reader.AcroFields;
+                        foreach (var item in reader.AcroFields.Fields)
                         {
                             string val1 = fields.GetField(item.Key.ToString());
                             build.Append(val1 + Environment.NewLine);
                         }
                         richTextBox1.Text = build.ToString();
+                        reader.Close();
 
 
-                        string pdfTemplate = @"C:\Users\Tau\Desktop\Pathfinder_Charactersheet_Joe.pdf";
+                        //string pdfTemplate = @"C:\Users\Tau\Desktop\Pathfinder_Charactersheet_Joe.pdf";
                         // title the form
-                        this.Text += " - " + pdfTemplate;
+                        //this.Text += " - " + pdfTemplate;
                         // create a new PDF reader based on the PDF template document
 
-                        PdfReader pdfReader = new PdfReader(pdfTemplate);
+                        //PdfReader pdfReader = new PdfReader(pdfTemplate);
                         // create and populate a string builder with each of the
 
                         // field names available in the subject PDF
-                        foreach (KeyValuePair<string, iTextSharp.text.pdf.AcroFields.Item> de in pdfReader.AcroFields.Fields)
+                        //foreach (KeyValuePair<string, iTextSharp.text.pdf.AcroFields.Item> de in pdfReader.AcroFields.Fields)
 
-                        {
-                            sb.Append(de.Key.ToString() + Environment.NewLine);
-                        }
+                        //{
+                        //    sb.Append(de.Key.ToString() + Environment.NewLine);
+                        //}
                         // Write the string builder's content to the form's textbox which includes form data names
 
                         //richTextBox2.Text = sb.ToString();
                         //richTextBox2.SelectionStart = 0;
 
+                        label2.Text = fields.GetField("Character_Player");
                         characterName.Text = fields.GetField("Character_Name");
+                        characterRace.Text = fields.GetField("Character_Race");
                     }
                     catch(Exception ex)
                     {
