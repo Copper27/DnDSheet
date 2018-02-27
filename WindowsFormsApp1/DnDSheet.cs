@@ -10,11 +10,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Collections;
+using System.IO;
 
 namespace DnDSheet
 {
     public partial class DnDSheet : Form
     {
+        private Character newChar = new Character();
+
         public DnDSheet()
         {
             InitializeComponent();
@@ -40,14 +43,12 @@ namespace DnDSheet
                         //reader.Close();
 
                         StringBuilder build = new StringBuilder();
-                        //var reader1 = new PdfReader(@"C:\Users\Tau\Desktop\Pathfinder_Charactersheet_Joe.pdf");
                         AcroFields fields = reader.AcroFields;
                         foreach (var item in reader.AcroFields.Fields)
                         {
                             string val1 = fields.GetField(item.Key.ToString());
                             build.Append(val1 + Environment.NewLine);
                         }
-                        richTextBox1.Text = build.ToString();
                         reader.Close();
 
 
@@ -73,6 +74,9 @@ namespace DnDSheet
                         label2.Text = fields.GetField("Character_Player");
                         characterName.Text = fields.GetField("Character_Name");
                         characterRace.Text = fields.GetField("Character_Race");
+                        characterSize.Text = fields.GetField("Character_Size");
+                        //Character newChar = new Character();
+                        newChar.charName = fields.GetField("Character_Name");
                     }
                     catch(Exception ex)
                     {
@@ -81,10 +85,62 @@ namespace DnDSheet
             }
         }
 
-        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        private void btnSaveChar_Click(object sender, EventArgs e)
         {
+            if(MessageBox.Show("Do you want to save this character?", "Save Character", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                BinarySerialization.WriteToBinaryFile<Character>(@"C:\Users\Tau\Desktop\CompSci\Visual Studio Projects\character.bin", newChar);
+            }
+        }
 
+        private void btnLoad_Click(object sender, EventArgs e)
+        {
+            Character newChar = BinarySerialization.ReadFromBinaryFile<Character>(@"C:\Users\Tau\Desktop\CompSci\Visual Studio Projects\character.bin");
+            characterName.Text = newChar.charName;
         }
     }
 }
 
+
+
+/// <summary>
+/// Functions for performing common binary Serialization operations.
+/// <para>All properties and variables will be serialized.</para>
+/// <para>Object type (and all child types) must be decorated with the [Serializable] attribute.</para>
+/// <para>To prevent a variable from being serialized, decorate it with the [NonSerialized] attribute; cannot be applied to properties.</para>
+/// </summary>
+public static class BinarySerialization
+{
+    /// <summary>
+    /// Writes the given object instance to a binary file.
+    /// <para>Object type (and all child types) must be decorated with the [Serializable] attribute.</para>
+    /// <para>To prevent a variable from being serialized, decorate it with the [NonSerialized] attribute; cannot be applied to properties.</para>
+    /// </summary>
+    /// <typeparam name="T">The type of object being written to the XML file.</typeparam>
+    /// <param name="filePath">The file path to write the object instance to.</param>
+    /// <param name="objectToWrite">The object instance to write to the XML file.</param>
+    /// <param name="append">If false the file will be overwritten if it already exists. If true the contents will be appended to the file.</param>
+    public static void WriteToBinaryFile<Character>(string filePath, Character objectToWrite, bool append = false)
+    {
+        using (Stream stream = File.Open(filePath, append ? FileMode.Append : FileMode.Create))
+        {
+            var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            binaryFormatter.Serialize(stream, objectToWrite);
+        }
+    }
+
+    /// <summary>
+    /// Reads an object instance from a binary file.
+    /// </summary>
+    /// <typeparam name="T">The type of object to read from the XML.</typeparam>
+    /// <param name="filePath">The file path to read the object instance from.</param>
+    /// <returns>Returns a new instance of the object read from the binary file.</returns>
+    public static Character ReadFromBinaryFile<Character>(string filePath)
+    {
+        using (Stream stream = File.Open(filePath, FileMode.Open))
+        {
+            var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            return (Character)binaryFormatter.Deserialize(stream);
+        }
+    }
+}
